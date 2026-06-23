@@ -1,0 +1,45 @@
+name: "Validate and test Helm chart"
+
+on:
+  workflow_call:
+    inputs:
+      chart_directory:
+        required: false
+        type: string
+        default: "."
+      helm_version:
+        required: false
+        type: string
+        default: ""
+      run_unittest:
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/setup@1.0.0
+        with:
+          helm_version: ${{ inputs.helm_version }}
+          install_unittest: ${{ inputs.run_unittest }}
+      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/lint@1.0.0
+        with:
+          chart_directory: ${{ inputs.chart_directory }}
+      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/validate@1.0.0
+        with:
+          chart_directory: ${{ inputs.chart_directory }}
+          run_unittest: ${{ inputs.run_unittest }}
+      - id: package
+        uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/package@1.0.0
+        with:
+          chart_directory: ${{ inputs.chart_directory }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chart-package
+          path: ${{ steps.package.outputs.package_path }}
+          retention-days: 3

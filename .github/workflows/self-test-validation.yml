@@ -1,0 +1,35 @@
+name: "Self-test: validation"
+
+on:
+  pull_request:
+    paths:
+      - "actions/**"
+      - "tests/**"
+      - ".github/workflows/self-test-validation.yml"
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./actions/setup
+        with:
+          install_unittest: "true"
+      - uses: ./actions/lint
+        with:
+          chart_directory: tests/fixture-chart
+      - uses: ./actions/validate
+        with:
+          chart_directory: tests/fixture-chart
+          run_unittest: "true"
+      - id: package
+        uses: ./actions/package
+        with:
+          chart_directory: tests/fixture-chart
+      - name: Assert package produced a tgz
+        run: test -f "${{ steps.package.outputs.package_path }}"

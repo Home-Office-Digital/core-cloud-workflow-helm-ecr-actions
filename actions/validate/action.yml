@@ -1,0 +1,21 @@
+name: "Helm validate"
+description: "Render templates and run unit tests"
+inputs:
+  chart_directory:
+    description: "Directory containing the helm chart"
+    required: false
+    default: "."
+  run_unittest:
+    description: "Run helm unittest"
+    required: false
+    default: "true"
+runs:
+  using: "composite"
+  steps:
+    - name: Render templates
+      shell: bash
+      run: helm template release ./${{ inputs.chart_directory }} --debug
+    - name: Unit test chart
+      if: ${{ inputs.run_unittest == 'true' }}
+      shell: bash
+      run: helm unittest ${{ inputs.chart_directory }}

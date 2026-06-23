@@ -1,0 +1,51 @@
+name: "ECR login"
+description: "Assume an IAM role and log in to Amazon ECR"
+inputs:
+  aws_region:
+    description: "AWS region of the ECR registry"
+    required: false
+    default: "eu-west-2"
+  role_to_assume:
+    description: "IAM role - full ARN, or bare role name when account_id is set"
+    required: true
+  account_id:
+    description: "AWS account ID - required only with a bare role name"
+    required: false
+    default: ""
+outputs:
+  registry:
+    description: "The ECR registry host"
+    value: ${{ steps.login-ecr.outputs.registry }}
+runs:
+  using: "composite"
+  steps:
+    - name: Resolve role ARN
+      id: role
+      shell: bash
+      env:
+        ROLE: ${{ inputs.role_to_assume }}
+        ACCOUNT_ID: ${{ inputs.account_id }}
+        AWS_REGION: ${{ inputs.aws_region }}
+      run: |
+        set -euo pipefail
+        if ! [[ "${AWS_REGION}" =~ ^[a-zA-Z0-9-]+$ ]]; then
+          echo "Error: aws_region must be alphanumeric with hyphens"; exit 1
+        fi
+        if [[ "${ROLE}" == arn:aws:iam::* ]]; then
+          echo "arn=${ROLE}" >> "$GITHUB_OUTPUT"
+        else
+          if ! [[ "${ACCOUNT_ID}" =~ ^[0-9]+$ ]]; then
+            echo "Error: account_id required (numeric) with a bare role name"; exit 1
+          fi
+          echo "arn=arn:aws:iam::${ACCOUNT_ID}:role/${ROLE}" >> "$GITHUB_OUTPUT"
+        fi
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v6
+      with:
+        role-to-assume: ${{ steps.role.outputs.arn }}
+        role-session-name: GitHubActions
+        retry-max-attempts: 5
+        aws-region: ${{ inputs.aws_region }}
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2

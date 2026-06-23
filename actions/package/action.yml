@@ -1,0 +1,37 @@
+name: "Helm package"
+description: "Resolve dependencies and package a chart, exposing name/version/path"
+inputs:
+  chart_directory:
+    description: "Directory containing the helm chart"
+    required: false
+    default: "."
+  output_directory:
+    description: "Directory to write the .tgz to. Empty = a temp dir"
+    required: false
+    default: ""
+outputs:
+  chart_name:
+    description: "Chart name from Chart.yaml"
+    value: ${{ steps.pkg.outputs.chart_name }}
+  chart_version:
+    description: "Chart version from Chart.yaml"
+    value: ${{ steps.pkg.outputs.chart_version }}
+  package_path:
+    description: "Absolute path to the packaged .tgz"
+    value: ${{ steps.pkg.outputs.package_path }}
+runs:
+  using: "composite"
+  steps:
+    - name: Package chart
+      id: pkg
+      shell: bash
+      run: |
+        set -euo pipefail
+        CHART_NAME=$(yq '.name' "${{ inputs.chart_directory }}/Chart.yaml")
+        CHART_VERSION=$(yq '.version' "${{ inputs.chart_directory }}/Chart.yaml")
+        OUT="${{ inputs.output_directory }}"
+        [[ -z "$OUT" ]] && OUT="$(mktemp -d)"
+        ( cd "${{ inputs.chart_directory }}" && helm dependency update && helm package . -d "$OUT" )
+        echo "chart_name=$CHART_NAME" >> "$GITHUB_OUTPUT"
+        echo "chart_version=$CHART_VERSION" >> "$GITHUB_OUTPUT"
+        echo "package_path=$OUT/${CHART_NAME}-${CHART_VERSION}.tgz" >> "$GITHUB_OUTPUT"
