@@ -1,6 +1,6 @@
 # Contribution guide
 
-Contributing to `core-cloud-workflow-yarn-actions`
+Contributing to `core-cloud-workflow-helm-ecr-actions`
 
 This repository is part of the UK Home Office Core Cloud Platform shared tooling ecosystem.
 To maintain consistent security and operational standards, all contributions must follow the guidelines below.
