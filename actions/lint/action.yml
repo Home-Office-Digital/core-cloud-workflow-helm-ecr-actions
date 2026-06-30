@@ -1,0 +1,13 @@
+name: "Helm lint"
+description: "Run helm lint on a chart"
+inputs:
+  chart_directory:
+    description: "Directory containing the helm chart"
+    required: false
+    default: "."
+runs:
+  using: "composite"
+  steps:
+    - name: Lint chart
+      shell: bash
+      run: helm lint ${{ inputs.chart_directory }}

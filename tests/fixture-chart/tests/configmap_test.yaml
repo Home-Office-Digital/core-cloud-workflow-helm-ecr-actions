@@ -1,0 +1,11 @@
+suite: configmap
+templates:
+  - configmap.yaml
+tests:
+  - it: sets replicas from values
+    set:
+      replicaCount: 3
+    asserts:
+      - equal:
+          path: data.replicas
+          value: "3"

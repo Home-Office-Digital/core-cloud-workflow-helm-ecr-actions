@@ -1,0 +1,6 @@
+apiVersion: v2
+name: smoke-test
+description: Fixture chart for smoke-testing the actions
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

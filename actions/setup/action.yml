@@ -1,0 +1,23 @@
+name: "Helm setup"
+description: "Install Helm and optionally the helm-unittest plugin"
+inputs:
+  helm_version:
+    description: "Helm version to install (e.g. v3.16.3). Empty = runner default"
+    required: false
+    default: ""
+  install_unittest:
+    description: "Install the helm-unittest plugin"
+    required: false
+    default: "false"
+runs:
+  using: "composite"
+  steps:
+    - name: Install Helm
+      if: ${{ inputs.helm_version != '' }}
+      uses: azure/setup-helm@v4
+      with:
+        version: ${{ inputs.helm_version }}
+    - name: Install helm-unittest plugin
+      if: ${{ inputs.install_unittest == 'true' }}
+      shell: bash
+      run: helm plugin install https://github.com/helm-unittest/helm-unittest
