@@ -43,20 +43,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/setup@feature/add-platform-ecr-prefix
+      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/setup@1.1.0
         with:
           helm_version: ${{ inputs.helm_version }}
       - id: login
-        uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/login@feature/add-platform-ecr-prefix
+        uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/login@1.1.0
         with:
           aws_region: ${{ inputs.aws_region }}
           role_to_assume: ${{ inputs.aws_role_to_assume }}
           account_id: ${{ secrets.ecr_account_id }}
       - id: package
-        uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/package@feature/add-platform-ecr-prefix
+        uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/package@1.1.0
         with:
           chart_directory: ${{ inputs.chart_directory }}
-      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/publish@feature/add-platform-ecr-prefix
+      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/publish@1.1.0
         with:
           registry: ${{ steps.login.outputs.registry }}
           package_path: ${{ steps.package.outputs.package_path }}
