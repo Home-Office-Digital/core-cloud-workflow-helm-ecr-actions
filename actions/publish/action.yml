@@ -29,6 +29,10 @@ inputs:
     description: "Assert the git tag matches chart_version"
     required: false
     default: "true"
+  repository_prefix:
+    description: "Optional ECR namespace prefixed to the chart name (e.g. 'platform' pushes to <registry>/platform/<chart>)"
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -54,15 +58,25 @@ runs:
       env:
         AWS_REGION: ${{ inputs.aws_region }}
         CHART_NAME: ${{ inputs.chart_name }}
+        REPOSITORY_PREFIX: ${{ inputs.repository_prefix }}
       run: |
         set -euo pipefail
-        aws ecr describe-repositories --region "${AWS_REGION}" --repository-names "${CHART_NAME}" >/dev/null 2>&1 \
-          || aws ecr create-repository --region "${AWS_REGION}" --repository-name "${CHART_NAME}" >/dev/null
+        REPO_NAME="${CHART_NAME}"
+        if [[ -n "${REPOSITORY_PREFIX}" ]]; then
+          REPO_NAME="${REPOSITORY_PREFIX}/${CHART_NAME}"
+        fi
+        aws ecr describe-repositories --region "${AWS_REGION}" --repository-names "${REPO_NAME}" >/dev/null 2>&1 \
+          || aws ecr create-repository --region "${AWS_REGION}" --repository-name "${REPO_NAME}" >/dev/null
     - name: Push chart to ECR
       shell: bash
       env:
         REGISTRY: ${{ inputs.registry }}
         PACKAGE_PATH: ${{ inputs.package_path }}
+        REPOSITORY_PREFIX: ${{ inputs.repository_prefix }}
       run: |
         set -euo pipefail
-        helm push "${PACKAGE_PATH}" "oci://${REGISTRY}"
+        TARGET="oci://${REGISTRY}"
+        if [[ -n "${REPOSITORY_PREFIX}" ]]; then
+          TARGET="${TARGET}/${REPOSITORY_PREFIX}"
+        fi
+        helm push "${PACKAGE_PATH}" "${TARGET}"
