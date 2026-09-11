@@ -26,6 +26,10 @@ on:
         required: false
         type: boolean
         default: false
+      repository_prefix:
+        required: false
+        type: string
+        default: ""
     secrets:
       ecr_account_id:
         required: false
@@ -39,20 +43,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/setup@1.0.0
+      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/setup@feature/add-platform-ecr-prefix
         with:
           helm_version: ${{ inputs.helm_version }}
       - id: login
-        uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/login@1.0.0
+        uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/login@feature/add-platform-ecr-prefix
         with:
           aws_region: ${{ inputs.aws_region }}
           role_to_assume: ${{ inputs.aws_role_to_assume }}
           account_id: ${{ secrets.ecr_account_id }}
       - id: package
-        uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/package@1.0.0
+        uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/package@feature/add-platform-ecr-prefix
         with:
           chart_directory: ${{ inputs.chart_directory }}
-      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/publish@1.0.0
+      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/publish@feature/add-platform-ecr-prefix
         with:
           registry: ${{ steps.login.outputs.registry }}
           package_path: ${{ steps.package.outputs.package_path }}
@@ -62,3 +66,4 @@ jobs:
           aws_region: ${{ inputs.aws_region }}
           create_repository: ${{ inputs.create_repository }}
           validate_version_tag: ${{ inputs.validate_version_tag }}
+          repository_prefix: ${{ inputs.repository_prefix }}
