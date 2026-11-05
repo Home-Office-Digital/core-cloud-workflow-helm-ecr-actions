@@ -23,19 +23,19 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
-      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/setup@1.1.2
+      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/setup@b73f46fb185e204963576df97bca1ed7c77039b4
         with:
           helm_version: ${{ inputs.helm_version }}
           install_unittest: ${{ inputs.run_unittest }}
-      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/lint@1.1.2
+      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/lint@b73f46fb185e204963576df97bca1ed7c77039b4
         with:
           chart_directory: ${{ inputs.chart_directory }}
-      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/validate@1.1.2
+      - uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/validate@b73f46fb185e204963576df97bca1ed7c77039b4
         with:
           chart_directory: ${{ inputs.chart_directory }}
           run_unittest: ${{ inputs.run_unittest }}
       - id: package
-        uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/package@1.1.2
+        uses: Home-Office-Digital/core-cloud-workflow-helm-ecr-actions/actions/package@b73f46fb185e204963576df97bca1ed7c77039b4
         with:
           chart_directory: ${{ inputs.chart_directory }}
       - uses: actions/upload-artifact@v4
